@@ -1,11 +1,21 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import '../models/category.dart';
 import '../models/item.dart';
 
 class ApiService {
-  // สำหรับ Android Emulator ใช้ 10.0.2.2 แทน 127.0.0.1
-  static const String baseUrl = 'http://10.0.2.2:8080/api';
+  static String get baseUrl {
+    if (kIsWeb) {
+      return 'http://localhost:8080/api';
+    } else if (Platform.isAndroid) {
+      return 'http://10.0.2.2:8080/api';
+    } else {
+      // iOS, macOS, desktop
+      return 'http://localhost:8080/api';
+    }
+  }
 
   Future<List<MainCategory>> getMainCategories() async {
     try {
