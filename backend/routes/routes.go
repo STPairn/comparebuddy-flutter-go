@@ -17,6 +17,12 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/items/meta/brands", handlers.GetBrands)
 	api.Get("/items/meta/fields", handlers.GetFields)
 	
+	// Auth
+	auth := api.Group("/auth")
+	auth.Post("/register", handlers.Register)
+	auth.Post("/login", handlers.Login)
+	auth.Post("/google", handlers.GoogleLogin)
+
 	// Health check
 	api.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
