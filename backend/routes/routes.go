@@ -23,6 +23,16 @@ func SetupRoutes(app *fiber.App) {
 	auth.Post("/login", handlers.Login)
 	auth.Post("/google", handlers.GoogleLogin)
 
+	// Cars
+	cars := api.Group("/cars")
+	cars.Get("/brands", handlers.GetCarBrands)
+	cars.Get("/brands/:id", handlers.GetCarBrandByID)
+	cars.Get("/models", handlers.GetCarModels)
+	cars.Get("/models/:id", handlers.GetCarModelByID)
+	cars.Get("/variants/:id", handlers.GetCarVariantByID)
+	cars.Get("/compare", handlers.CompareCarVariants)
+	cars.Get("/search", handlers.SearchCars)
+
 	// Health check
 	api.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
