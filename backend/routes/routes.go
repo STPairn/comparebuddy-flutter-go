@@ -32,6 +32,7 @@ func SetupRoutes(app *fiber.App) {
 	cars.Get("/variants/:id", handlers.GetCarVariantByID)
 	cars.Get("/compare", handlers.CompareCarVariants)
 	cars.Get("/search", handlers.SearchCars)
+	cars.Get("/browse", handlers.BrowseCarVariants)
 
 	// Health check
 	api.Get("/health", func(c *fiber.Ctx) error {

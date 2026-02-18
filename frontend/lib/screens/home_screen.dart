@@ -7,6 +7,7 @@ import '../models/user.dart';
 import '../services/api_service.dart';
 import '../widgets/category_button.dart';
 import '../widgets/item_card.dart';
+import 'car_browse_screen.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 
@@ -103,6 +104,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadItems(int categoryId) async {
+    // Check if selected sub-category is "รถยนต์" (car)
+    final selectedCat = _subCategories.where((c) => c.id == categoryId).firstOrNull;
+    if (selectedCat != null && selectedCat.nameEn == 'car') {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const CarBrowseScreen()),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
       final items = await _apiService.getItems(categoryId: categoryId);

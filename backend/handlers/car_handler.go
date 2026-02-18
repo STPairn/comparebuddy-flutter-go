@@ -267,6 +267,74 @@ func CompareCarVariants(c *fiber.Ctx) error {
 	})
 }
 
+// BrowseCarVariants - GET /api/cars/browse?min_price=500000&max_price=1500000&powertrain_type=BEV
+func BrowseCarVariants(c *fiber.Ctx) error {
+	minPrice := c.Query("min_price")
+	maxPrice := c.Query("max_price")
+	powertrainType := c.Query("powertrain_type")
+
+	minRange := c.Query("min_range")
+	minFuelEfficiency := c.Query("min_fuel_efficiency")
+
+	query := `SELECT v.id, v.model_id, v.name, v.price_baht, v.status, b.name, m.name, m.powertrain_type, v.range_km, v.fuel_consumption_kml
+		FROM car_variants v
+		JOIN car_models m ON v.model_id = m.id
+		JOIN car_brands b ON m.brand_id = b.id
+		WHERE v.price_baht IS NOT NULL`
+	args := []interface{}{}
+
+	if minPrice != "" {
+		query += " AND v.price_baht >= ?"
+		args = append(args, minPrice)
+	}
+	if maxPrice != "" {
+		query += " AND v.price_baht <= ?"
+		args = append(args, maxPrice)
+	}
+	if powertrainType != "" {
+		query += " AND m.powertrain_type = ?"
+		args = append(args, powertrainType)
+	}
+	if minRange != "" {
+		query += " AND v.range_km >= ?"
+		args = append(args, minRange)
+	}
+	if minFuelEfficiency != "" {
+		query += " AND v.fuel_consumption_kml >= ?"
+		args = append(args, minFuelEfficiency)
+	}
+
+	query += " ORDER BY v.price_baht LIMIT 50"
+
+	rows, err := config.DB.Query(query, args...)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Browse failed"})
+	}
+	defer rows.Close()
+
+	type SearchResult struct {
+		VariantID          int      `json:"variant_id"`
+		ModelID            int      `json:"model_id"`
+		VariantName        string   `json:"variant_name"`
+		PriceBaht          *float64 `json:"price_baht"`
+		Status             string   `json:"status"`
+		BrandName          string   `json:"brand_name"`
+		ModelName          string   `json:"model_name"`
+		PowertrainType     string   `json:"powertrain_type"`
+		RangeKm            *int     `json:"range_km"`
+		FuelConsumptionKml *float64 `json:"fuel_consumption_kml"`
+	}
+
+	var results []SearchResult
+	for rows.Next() {
+		var r SearchResult
+		rows.Scan(&r.VariantID, &r.ModelID, &r.VariantName, &r.PriceBaht, &r.Status, &r.BrandName, &r.ModelName, &r.PowertrainType, &r.RangeKm, &r.FuelConsumptionKml)
+		results = append(results, r)
+	}
+
+	return c.JSON(results)
+}
+
 // SearchCars - GET /api/cars/search?q=atto
 func SearchCars(c *fiber.Ctx) error {
 	q := c.Query("q")
